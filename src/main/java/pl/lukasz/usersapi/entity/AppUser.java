@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 @Table(name = "users")
 @Data
 @NoArgsConstructor
-@RequiredArgsConstructor
 public class AppUser {
 
     @Id
