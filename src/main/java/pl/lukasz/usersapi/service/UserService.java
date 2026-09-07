@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import pl.lukasz.usersapi.dto.CreateUserRequest;
 import pl.lukasz.usersapi.dto.UserResponse;
 import pl.lukasz.usersapi.entity.AppUser;
+import pl.lukasz.usersapi.exception.ResourceNotFoundException;
+import pl.lukasz.usersapi.mapper.UserMapper;
 import pl.lukasz.usersapi.repository.UserRepository;
 
 import java.util.List;
@@ -14,84 +16,36 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     public UserResponse createUser(CreateUserRequest request){
-        AppUser user = new AppUser();
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setEmail(request.getEmail());
-
+        AppUser user = userMapper.toEntity(request);
         AppUser savedUser = userRepository.save(user);
-
-        UserResponse response = new UserResponse();
-        response.setId(savedUser.getId());
-        response.setFirstName(savedUser.getFirstName());
-        response.setLastName(savedUser.getLastName());
-        response.setEmail(savedUser.getEmail());
-
-        return response;
+        return userMapper.toResponse(savedUser);
     }
 
     public List<UserResponse> getAllUsers(){
         return userRepository.findAll()
                 .stream()
-                .map(user ->{
-                    UserResponse response = new UserResponse();
-                    response.setId(user.getId());
-                    response.setFirstName(user.getFirstName());
-                    response.setLastName(user.getLastName());
-                    response.setEmail(user.getEmail());
-                    return response;
-                })
+                .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     public UserResponse getUserById(Long id){
-        AppUser user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-
-        UserResponse response = new UserResponse();
-        response.setId(user.getId());
-        response.setFirstName(user.getFirstName());
-        response.setLastName(user.getLastName());
-        response.setEmail(user.getEmail());
-
-        return response;
+        AppUser user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return userMapper.toResponse(user);
     }
 
     public UserResponse updateUser(Long id, CreateUserRequest request){
 
-        AppUser user = userRepository.findById(id).orElseThrow(()-> new RuntimeException("User not found"));
-        user.setEmail(request.getEmail());
-        user.setLastName(request.getLastName());
-        user.setFirstName(request.getFirstName());
-
+        AppUser user = userRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("User not found"));
+        userMapper.updateEntity(request,user);
         AppUser savedUser = userRepository.save(user);
-
-        UserResponse response = new UserResponse();
-        response.setId(savedUser.getId());
-        response.setFirstName(savedUser.getFirstName());
-        response.setLastName(savedUser.getLastName());
-        response.setEmail(savedUser.getEmail());
-
-        return response;
+        return userMapper.toResponse(savedUser);
     }
 
     public void deleteUser(Long id){
         userRepository.deleteById(id);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
