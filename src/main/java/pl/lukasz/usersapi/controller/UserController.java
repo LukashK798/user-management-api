@@ -2,14 +2,14 @@ package pl.lukasz.usersapi.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.lukasz.usersapi.dto.CreateUserRequest;
 import pl.lukasz.usersapi.dto.UserResponse;
 import pl.lukasz.usersapi.service.UserService;
-
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 @RequestMapping("/api/users")
 @RestController
@@ -25,9 +25,8 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers(){
-        List<UserResponse> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<Page<UserResponse>> getAllUsers(Pageable pageable){
+        return ResponseEntity.ok(userService.getAllUsers(pageable));
     }
 
     @GetMapping("/{id}")

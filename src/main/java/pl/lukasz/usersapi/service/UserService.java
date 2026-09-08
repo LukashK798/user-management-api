@@ -1,6 +1,7 @@
 package pl.lukasz.usersapi.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import pl.lukasz.usersapi.dto.CreateUserRequest;
 import pl.lukasz.usersapi.dto.UserResponse;
@@ -8,9 +9,7 @@ import pl.lukasz.usersapi.entity.AppUser;
 import pl.lukasz.usersapi.exception.ResourceNotFoundException;
 import pl.lukasz.usersapi.mapper.UserMapper;
 import pl.lukasz.usersapi.repository.UserRepository;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -24,11 +23,9 @@ public class UserService {
         return userMapper.toResponse(savedUser);
     }
 
-    public List<UserResponse> getAllUsers(){
-        return userRepository.findAll()
-                .stream()
-                .map(userMapper::toResponse)
-                .collect(Collectors.toList());
+    public Page<UserResponse> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(userMapper::toResponse);
     }
 
     public UserResponse getUserById(Long id){

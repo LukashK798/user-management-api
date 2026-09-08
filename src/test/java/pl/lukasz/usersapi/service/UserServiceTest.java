@@ -13,6 +13,11 @@ import pl.lukasz.usersapi.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -82,9 +87,6 @@ class UserServiceTest {
 
     @Test
     void getAllUsers() {
-        AppUser mockUser = new AppUser();
-        mockUser.setFirstName("Kamil");
-
         AppUser savedMockuser = new AppUser();
         savedMockuser.setId(5L);
         savedMockuser.setFirstName("Kamil");
@@ -93,15 +95,17 @@ class UserServiceTest {
         mockResponse.setId(5L);
         mockResponse.setFirstName("Kamil");
 
-        when(userRepository.findAll()).thenReturn(List.of(savedMockuser));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<AppUser> mockPage = new PageImpl<>(List.of(savedMockuser));
+
+        when(userRepository.findAll(pageable)).thenReturn(mockPage);
         when(userMapper.toResponse(savedMockuser)).thenReturn(mockResponse);
 
-        List<UserResponse> result = userService.getAllUsers();
+        Page<UserResponse> result = userService.getAllUsers(pageable);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Kamil", result.get(0).getFirstName());
-
+        assertEquals(1, result.getContent().size());
+        assertEquals("Kamil", result.getContent().get(0).getFirstName());
     }
 
     @Test
